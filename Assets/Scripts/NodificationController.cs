@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -40,10 +41,16 @@ public class NodificationController : MonoBehaviour
     public void SandNodification(Sprite icon, string title, string context)
     {
         NodifyNow = true;
-        StartCoroutine(SandNodificationCoroutine(icon, title, context));
+        StartCoroutine(SandNodificationCoroutine(icon, title, context, () => Input.GetKeyDown(KeyCode.Space)));
     }
 
-    public IEnumerator SandNodificationCoroutine(Sprite icon, string title, string context, float speed = 0.08f)
+    public void SandNodification(Sprite icon, string title, string context, System.Func<bool> cancelWhen)
+    {
+        NodifyNow = true;
+        StartCoroutine(SandNodificationCoroutine(icon, title, context, cancelWhen));
+    }
+
+    public IEnumerator SandNodificationCoroutine(Sprite icon, string title, string context, System.Func<bool> cancelWhen, float speed = 0.08f)
     {
         _skip = false;
         _iconImage.sprite = icon;
@@ -63,7 +70,7 @@ public class NodificationController : MonoBehaviour
 
         yield return new WaitForSeconds(0.25f);
 
-        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+        yield return new WaitUntil(cancelWhen);
 
         _nodifyPanel.transform.DOMove(new Vector3(-1000, 0, 0), 0.5f);
         _context.text = "";
